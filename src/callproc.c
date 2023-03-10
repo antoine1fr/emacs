@@ -1490,13 +1490,9 @@ emacs_spawn (pid_t *newpid, int std_in, int std_out, int std_err,
   const sigset_t *volatile oldset_volatile = oldset;
 
 #ifdef DARWIN_OS
-  /* Darwin doesn't let us run setsid after a vfork, so use fork when
-     necessary.  Below, we reset SIGCHLD handling after a vfork, as
-     apparently macOS can mistakenly deliver SIGCHLD to the child.  */
-  if (pty_in || pty_out)
-    pid = fork ();
-  else
-    pid = VFORK ();
+  /* Always use fork on Darwin, as vfork has been deprecated since macOS 12 and
+     calls to it frequently fail. */
+  pid = fork ();
 #else
   pid = vfork ();
 #endif
